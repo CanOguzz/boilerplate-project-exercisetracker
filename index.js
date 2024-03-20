@@ -58,11 +58,11 @@ app.post("/api/users", async (req, res) => {
 });
 //get all users
 app.get("/api/users", async (req, res) => {
-  try {
-    const users = await User.find({}).select("username _id");
+  const users = await User.find({}).select("_id username ");
+  if (!users) {
+    return res.status(404).send("No users found");
+  } else {
     res.json(users);
-  } catch (err) {
-    console.error(err);
   }
 });
 
@@ -81,7 +81,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
         description,
         duration,
         date: date ? new Date(date) : new Date(),
-      })
+      });
       const exercise = await exerciseObj.save();
       res.json({
         _id: user._id,
@@ -99,41 +99,38 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 
 app.get("/api/users/:_id/logs", async (req, res) => {
   const { from, to, limit } = req.query;
-  const userId = req.params._id;
-  const user = await User.findById(userId);
+  const id = req.params._id;
+  const user = await User.findById(id);
   if (!user) {
-    return res.status(404).send("User not found");
-  } else {
-    let dateObj = {};
-    if (from) {
-      dateObj.$gte = new Date(from);
-    }
-    if (to) {
-      dateObj.$lte = new Date(to);
-    }
-    let filter = {
-      user_id: userId,
-    };
-    if (from || to) {
-      filter.date = dateObj;
-    }
-
-    const exercises = await Exercise.find(filter).limit(
-      parseInt(+limit) ?? 500
-    );
-
-    const log = exercises.map((e) => ({
-      description: e.description,
-      duration: e.duration,
-      date: e.date.toDateString(),
-    }));
-    res.json({
-      username: user.username,
-      count: exercises.length,
-      _id: user._id,
-      log,
-    });
+    return res.send("User not found");
   }
+  let dateObj = {};
+  if (from) {
+    dateObj.$gte = new Date(from);
+  }
+  if (to) {
+    dateObj.$lte = new Date(to);
+  }
+  let filter = {
+    user_id: id,
+  };
+  if (from || to) {
+    filter.date = dateObj;
+  }
+
+  const exercises = await Exercise.find(filter).limit(parseInt(+limit) ?? 500);
+
+  const log = exercises.map(e => ({
+    description: e.description,
+    duration: e.duration,
+    date: e.date.toDateString(),
+  }));
+  res.json({
+    username: user.username,
+    count: exercises.length,
+    _id: user._id,
+    log
+  });
 });
 
 app.use(cors());
