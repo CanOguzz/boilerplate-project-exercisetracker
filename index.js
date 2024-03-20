@@ -63,7 +63,7 @@ app.post("/api/users", async(req, res) => {
 //get all users
 app.get("/api/users", async(req, res) => {
     try{
-      const users = await User.find({});
+      const users = await User.find({}).select("username _id");
       res.json(users);
     }catch(err){
       console.error(err);
