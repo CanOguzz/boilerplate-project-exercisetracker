@@ -54,6 +54,7 @@ app.post("/api/users", async (req, res) => {
   try {
     const savedUser = await newUser.save();
     console.log("User saved: ", savedUser);
+    res.json({ username: savedUser.username, _id: savedUser._id });
   } catch (err) {
     console.error(err);
   }
