@@ -5,6 +5,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bodyParser = require("body-parser");
+const e = require("express");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -91,6 +92,45 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     } catch (err) {
       console.error(err);
     }
+  }
+});
+
+app.get("/api/users/:_id/logs", async (req, res) => {
+  const { from, to, limit } = req.query;
+  const userId = req.params._id;
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).send("User not found");
+  } else {
+    let dateObj = {};
+    if (from) {
+      dateObj.$gte = new Date(from);
+    }
+    if (to) {
+      dateObj.$lte = new Date(to);
+    }
+    let filter = {
+      user_id: userId,
+    };
+    if (from || to) {
+      filter.date = dateObj;
+    }
+
+    const exercises = await Exercise.find(filter).limit(
+      parseInt(+limit) ?? 500
+    );
+
+    const log = exercises.map((e) => ({
+      description: e.description,
+      duration: e.duration,
+      date: e.date.toDateString(),
+    }));
+    res.json({
+      username: user.username,
+      count: exercises.length,
+      _id: user._id,
+      log,
+    });
   }
 });
 
