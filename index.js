@@ -4,14 +4,14 @@ const cors = require("cors");
 require("dotenv").config();
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-
+// Connect to the database
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
 
-
+//test db connection
 async function connectToMongodb() {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -24,6 +24,13 @@ async function connectToMongodb() {
   }
 }
 connectToMongodb();
+
+const userSchema = new Schema({
+  username: { type: String, required: true },
+  //id being generated automatically
+});
+const User = mongoose.model("User", userSchema);
+
 
 app.use(cors());
 app.use(express.static("public"));
