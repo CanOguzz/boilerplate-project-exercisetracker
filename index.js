@@ -46,15 +46,13 @@ const Exercise = mongoose.model("Exercise", exerciseSchema);
 //add user
 app.post("/api/users", async (req, res) => {
   const username = req.body.username;
-  res.send({ username: username });
-  console.log("usernamsend");
+ 
 
-  const newUser = new User({ username: username });
-
+  const userObj = new User({ username: username });
   try {
-    const savedUser = await newUser.save();
-    console.log("User saved: ", savedUser);
-    res.json({ username: savedUser.username, _id: savedUser._id });
+    const user = await userObj.save();
+    console.log("User saved: ", user);
+    res.json(user);
   } catch (err) {
     console.error(err);
   }
