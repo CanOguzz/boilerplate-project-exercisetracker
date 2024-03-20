@@ -120,7 +120,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
 
   const exercises = await Exercise.find(filter).limit(+limit ?? 500);
 
-  const log = exercises.map(e => ({
+  const log = exercises.map((e) => ({
     description: e.description,
     duration: e.duration,
     date: e.date.toDateString(),
